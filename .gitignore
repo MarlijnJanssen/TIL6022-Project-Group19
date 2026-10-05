@@ -1,0 +1,5 @@
+
+data/raw/*.gpkg
+data/cleaned_data/
+.ipynb_checkpoints/
+__pycache__/
