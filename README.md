@@ -5,16 +5,16 @@ Python Programming Project Group 19 - 2026
 
 ## What this project is about
 
-In this project we look at whether people who live closer to a train station own fewer cars. We do this for all Dutch neighbourhoods in 2023. We also check if this relation is different for major and minor stations, and if it changes when a station has a lot of train disruptions.
+In this project we look at whether people who live closer to a train station own fewer cars. We do this for all Dutch neighbourhoods in 2023. We also check if this relation is different for major and minor stations, and if it changes when many trains at the nearest station are cancelled or delayed.
 
-**Main question:** Is there an association between distance to the nearest railway station and household car ownership in Dutch neighbourhoods (2023), and to what extent does this association vary by station type and disruption frequency (2021–2023)?
+**Main question:** Is there an association between distance to the nearest railway station and household car ownership in Dutch neighbourhoods (2023), and to what extent does this association vary by station type and by the share of disrupted trains at the nearest station (2023)?
 
 Sub-questions:
 
-- **SQ1:** How were car ownership per household, distance to the nearest station and train disruptions spread across Dutch neighbourhoods in 2023?
+- **SQ1:** How were car ownership per household, distance to the nearest station and the share of disrupted trains spread across Dutch neighbourhoods in 2023?
 - **SQ2:** What is the baseline relation between distance to the nearest station and car ownership, when we take income, urbanisation, household size and density into account?
 - **SQ3:** Is this relation different for neighbourhoods near a major station compared to a minor station?
-- **SQ4:** Is the relation weaker near stations with many disruptions?
+- **SQ4:** Is the relation weaker near stations with a high share of disrupted trains (cancelled or 5+ minutes late)?
 
 ## Repository structure
 
@@ -24,23 +24,25 @@ TIL6022-Project-Group19/
 ├── .gitignore
 ├── project_proposal.ipynb                     # project proposal (+ PDF export)
 ├── project_proposal.pdf
-├── project_template (1).ipynb                 # final report notebook
-├── Phase1_Phase2_data_cleaning.ipynb          # load and clean raw data
-├── Phase3_stations_koppelen.ipynb             # link each neighbourhood to its nearest station
-├── Phase4_storingen.ipynb                     # count disruptions per station
-├── Phase5_mastertabel.ipynb                   # combine everything in one master table
-├── Phase6_exploratory_analysis_and_maps.ipynb # maps and charts (SQ1)
-├── Phase7_regression.ipynb                    # Phase 7: regressions (SQ2, SQ3, SQ4)
-└── data/
-    ├── raw/            # raw data (the .gpkg map is not on GitHub, see below)
-    └── cleaned_data/   # made by the notebooks, not on GitHub
+├── project_template (1).ipynb                     # final report notebook
+└── Python project Til6022/
+    ├── Phase1_Phase2_data_cleaning.ipynb          # load and clean raw data
+    ├── Phase3_stations_koppelen.ipynb             # link each neighbourhood to its nearest station
+    ├── Phase4_storingen.ipynb                     # reliability per station (share of disrupted trains)
+    ├── Phase5_mastertabel.ipynb                   # combine everything in one master table
+    ├── Phase6_exploratory_analysis_and_maps.ipynb # maps and charts (SQ1)
+    ├── Phase7_regression_analysis.ipynb           # regressions (SQ2, SQ3, SQ4)
+    └── data/
+        ├── raw/              # raw data (the .gpkg map is not on GitHub, see below)
+        │   └── treinarchief/ # train archive 2023 (not on GitHub, see below)
+        └── cleaned_data/     # made by the notebooks, not on GitHub
 ```
 
-All notebooks use paths relative to the repository folder (`data/raw` and `data/cleaned_data`), so open Jupyter in the main folder of the repo.
+All notebooks use paths relative to the folder `Python project Til6022` (`data/raw` and `data/cleaned_data`). VS Code runs a notebook from its own folder, so this works automatically. If you use Jupyter in the browser, start it in the folder `Python project Til6022`.
 
 ## Data
 
-We use five datasets. All of them are open data.
+We use six datasets. All of them are open data.
 
 | Dataset | Source | File name in `data/raw/` | What we use it for |
 | --- | --- | --- | --- |
@@ -48,15 +50,18 @@ We use five datasets. All of them are open data.
 | [Nabijheid voorzieningen 2023 (85830NED)](https://www.cbs.nl/nl-nl/cijfers/detail/85830NED) | CBS | `nabijheid_2023.csv` | road distance to the nearest train station |
 | [Wijk- en buurtkaart 2023](https://www.cbs.nl/nl-nl/dossier/nederland-regionaal/geografische-data/wijk-en-buurtkaart-2023) (version 3) | CBS / Kadaster | `wijkenbuurten_2023_v3.gpkg` | shapes of the neighbourhoods for the maps |
 | [Railway stations](https://www.rijdendetreinen.nl/en/open-data/stations) | Rijden de Treinen | `stations-2023-09-nl.csv` | station code, type and location |
-| [Train disruptions 2021–2023](https://www.rijdendetreinen.nl/en/open-data/disruptions) | Rijden de Treinen | `disruptions-2021.csv`, `disruptions-2022.csv`, `disruptions-2023.csv` | number of disruptions per station |
+| [Train disruptions 2021–2023](https://www.rijdendetreinen.nl/en/open-data/disruptions) | Rijden de Treinen | `disruptions-2021.csv`, `disruptions-2022.csv`, `disruptions-2023.csv` | number of disruptions per station (only used to compare with the share of disrupted trains) |
+| [Train archive 2023](https://www.rijdendetreinen.nl/en/open-data/train-archive) | Rijden de Treinen | `treinarchief/services-2023-01.csv` … `services-2023-12.csv` | share of trains per station that were cancelled or 5+ minutes late (our reliability measure) |
 
 ### Downloading the data
 
-The CSV files are already in `data/raw/`. Only the neighbourhood map is too big for GitHub, so it is in the `.gitignore` and you have to download it yourself:
+Most CSV files are already in `data/raw/`. The neighbourhood map and the train archive are too big for GitHub, so they are in the `.gitignore` and you have to download them yourself:
 
 1. Go to the [Wijk- en buurtkaart 2023 page](https://www.cbs.nl/nl-nl/dossier/nederland-regionaal/geografische-data/wijk-en-buurtkaart-2023) on the CBS website.
 2. Download the GeoPackage of **version 3** of the 2023 map.
 3. Unzip it and put `wijkenbuurten_2023_v3.gpkg` in `data/raw/`. The notebooks use the layer `buurten` from this file.
+4. Go to the [train archive page](https://www.rijdendetreinen.nl/en/open-data/train-archive) of Rijden de Treinen and download the 12 monthly files of 2023 (`services-2023-01` up to `services-2023-12`).
+5. Unzip them and put the 12 `.csv` files in `data/raw/treinarchief/`.
 
 If you want to download the CSV files again yourself:
 
@@ -93,11 +98,11 @@ The notebooks have to be run in this order, because every notebook uses the file
 | Phase | Notebook | What it does | Saves |
 | --- | --- | --- | --- |
 | 1 + 2 | `Phase1_Phase2_data_cleaning.ipynb` | Loads all raw data, keeps only residential neighbourhoods with complete data and removes business areas | `buurten_schoon.pkl`, `stations.pkl`, `storingen.pkl`, `buurten_kaart.gpkg` |
-| 3 | `Phase3_stations_koppelen.ipynb` | Finds the nearest station for every neighbourhood (from the centre of the neighbourhood) and labels it as a major or minor station | `buurten_met_station.pkl` |
-| 4 | `Phase4_storingen.ipynb` | Counts the disruptions and disruption minutes per station per year for 2021–2023 (engineering work and foreign stations left out) | `storingen_per_station.pkl` |
-| 5 | `Phase5_mastertabel.ipynb` | Combines the results of Phase 3 and 4 into one table with one row per neighbourhood | `master.pkl` |
+| 3 | `Phase3_stations_koppelen.ipynb` | Finds the nearest station for every neighbourhood (from the centre of the neighbourhood, event stations left out) and labels it as a major or minor station | `buurten_met_station.pkl` |
+| 4 | `Phase4_storingen.ipynb` | Calculates the share of trains per station that were cancelled or 5+ minutes late in 2023 (train archive), and for comparison the number of disruptions per year in 2021–2023 (engineering work and foreign stations left out) | `storingen_per_station.pkl` |
+| 5 | `Phase5_mastertabel.ipynb` | Combines the results of Phase 3 and 4 into one table with one row per neighbourhood, and keeps only neighbourhoods within 10 km of a station | `master.pkl` |
 | 6 | `Phase6_exploratory_analysis_and_maps.ipynb` | Summary statistics, maps and charts for SQ1 | figures |
-| 7 | `Phase7_regression.ipynb` | Three regression models (A, B, C), one for each of SQ2, SQ3 and SQ4 | model results and figures |
+| 7 | `Phase7_regression_analysis.ipynb` | Three regression models (A, B, C), one for each of SQ2, SQ3 and SQ4 | model results and figures |
 
 Phase 8 (conclusions, policy implications and limitations) is written in the report, not in code.
 
@@ -109,27 +114,27 @@ Phase 8 (conclusions, policy implications and limitations) is written in the rep
    conda activate TIL6022-26
    ```
 3. Make sure the packages above are installed.
-4. Download the neighbourhood map and put it in `data/raw/` (see "Downloading the data").
-5. Open each notebook and choose *Run All*, from Phase 1 to Phase 7. Phase 3 and Phase 4 do not depend on each other, but both need to be done before Phase 5.
+4. Download the neighbourhood map and the train archive and put them in `data/raw/` (see "Downloading the data").
+5. Open each notebook, choose *Restart* and then *Run All*, from Phase 1 to Phase 7. Phase 3 and Phase 4 do not depend on each other, but both need to be done before Phase 5.
 
 Because `data/cleaned_data/` is in the `.gitignore`, you always have to run the notebooks yourself after cloning or pulling. If you change something in an earlier notebook, run all later notebooks again.
 
-**Major and minor stations:** we count megastations, intercity hub stations and intercity stations as major stations. All other stations are minor stations.
+**Major and minor stations:** we count megastations, intercity hub stations and intercity stations as major stations. All other stations are minor stations. The two event stations (Rotterdam Stadion and Heerenveen IJsstadion) are not used as nearest station, because trains only stop there during events.
 
 The final report is in `project_template (1).ipynb`.
 
 ## Notes
 
-- **Reference year:** all CBS data is from 2023. Disruptions are averaged over 2021–2023.
-- **Station code `NA`:** the station Nieuw Amsterdam has the code `NA`, which pandas reads as a missing value by default. The Phase 1 notebook uses `keep_default_na=False` to prevent this. With this setting the master table has 11,221 neighbourhoods; without it, 11,202. Make sure everyone in the group runs the same version so the numbers in the report match.
+- **Reference year:** all CBS data is from 2023. The share of disrupted trains is also from 2023. The number of disruptions is averaged over 2021–2023, but is only used for comparison.
+- **Station code `NA`:** the station Nieuw Amsterdam has the code `NA`, which pandas reads as a missing value by default. Phase 1 and Phase 4 fill this empty value with `'NA'` again (`fillna('NA')`). After cleaning there are 11,221 neighbourhoods, and 9,039 of them lie within 10 km of a station (the master table). Make sure everyone in the group runs the same version so the numbers in the report match.
 - **Code style:** the code follows the structure from the lectures (imports, variables, computations, output) and mostly uses methods taught in the course. Comments are written in English.
 
 ## Main findings (short)
 
 - Car ownership is lowest in the big cities and highest in rural areas.
-- Neighbourhoods further from a station have more cars per household (about 0.9 within 2 km, about 1.3 beyond 5 km). This effect stays significant with control variables, but it is small compared to household size, urbanisation and density.
+- Neighbourhoods further from a station have more cars per household (0.93 at 0–1 km, 1.35 at 8–10 km). This effect stays significant with control variables, but it is small compared to household size, urbanisation and density.
 - Neighbourhoods near a major station have slightly lower car ownership, but after adding the control variables the slope is not significantly different between major and minor stations.
-- The effect of distance is stronger, not weaker, near stations with many disruptions. A likely reason is that the stations with the most disruptions are also the busiest stations with the most trains.
+- We find no evidence that the effect of distance is weaker near stations with a high share of disrupted trains: the interaction is very small and not significant. With the old measure (number of disruptions per year) the effect looked stronger, but that measure mostly shows how busy a station is.
 
 ## References
 
@@ -138,3 +143,4 @@ The final report is in `project_template (1).ipynb`.
 - CBS & Kadaster (2026). *Wijk- en buurtkaart 2023*, version 3. https://www.cbs.nl/nl-nl/dossier/nederland-regionaal/geografische-data/wijk-en-buurtkaart-2023
 - Rijden de Treinen (2026). *Open data: railway stations*. CC0. https://www.rijdendetreinen.nl/en/open-data/stations
 - Rijden de Treinen (2026). *Open data: train disruptions*. CC BY 4.0. https://www.rijdendetreinen.nl/en/open-data/disruptions
+- Rijden de Treinen (2026). *Open data: train archive*. https://www.rijdendetreinen.nl/en/open-data/train-archive
