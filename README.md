@@ -1,5 +1,6 @@
-# TIL6022-Project-Group19
-Python Programming Project Group 19 - 2026
+# Station proximity, rail reliability and household car ownership in Dutch neighbourhoods
+
+TIL6022 Python Programming, Group 19, 2026
 
 **Authors:** Sofie Knevel, Louise Nanninga, Feline Mooren, Marlijn Janssen, Julia Koenen
 
@@ -24,7 +25,8 @@ TIL6022-Project-Group19/
 ├── .gitignore
 ├── project_proposal.ipynb                     # project proposal (+ PDF export)
 ├── project_proposal.pdf
-├── project_template (1).ipynb                     # final report notebook
+├── project_template (2).ipynb                 # final report notebook
+├── project_template (2).pdf                   # PDF export of the final report
 └── Python project Til6022/
     ├── Phase1_Phase2_data_cleaning.ipynb          # load and clean raw data
     ├── Phase3_stations_koppelen.ipynb             # link each neighbourhood to its nearest station
@@ -69,8 +71,6 @@ If you want to download the CSV files again yourself:
 - **Stations:** download the station list of September 2023 from the Rijden de Treinen open data page and save it as `stations-2023-09-nl.csv`.
 - **Disruptions:** download the yearly files for 2021, 2022 and 2023 from the Rijden de Treinen open data page and save them as `disruptions-<year>.csv`.
 
-To check if everything is in the right place, you can run the "Data availability check" at the end of `project_proposal.ipynb`. It prints OK for every file it finds.
-
 ## How to run the analysis
 
 ### Packages
@@ -102,7 +102,7 @@ The notebooks have to be run in this order, because every notebook uses the file
 | 4 | `Phase4_storingen.ipynb` | Calculates the share of trains per station that were cancelled or 5+ minutes late in 2023 (train archive), and for comparison the number of disruptions per year in 2021–2023 (engineering work and foreign stations left out) | `storingen_per_station.pkl` |
 | 5 | `Phase5_mastertabel.ipynb` | Combines the results of Phase 3 and 4 into one table with one row per neighbourhood, and keeps only neighbourhoods within 10 km of a station | `master.pkl` |
 | 6 | `Phase6_exploratory_analysis_and_maps.ipynb` | Summary statistics, maps and charts for SQ1 | figures |
-| 7 | `Phase7_regression_analysis.ipynb` | Three regression models (A, B, C), one for each of SQ2, SQ3 and SQ4 | model results and figures |
+| 7 | `Phase7_regression_analysis.ipynb` | Checks for multicollinearity (correlations and VIF), three regression models (A, B, C), one for each of SQ2, SQ3 and SQ4, and two robustness checks on model A (adding the distance to the nearest major transfer station, and standard errors clustered by municipality) | model results and figures |
 
 Phase 8 (conclusions, policy implications and limitations) is written in the report, not in code.
 
@@ -121,7 +121,7 @@ Because `data/cleaned_data/` is in the `.gitignore`, you always have to run the 
 
 **Major and minor stations:** we count megastations, intercity hub stations and intercity stations as major stations. All other stations are minor stations. The two event stations (Rotterdam Stadion and Heerenveen IJsstadion) are not used as nearest station, because trains only stop there during events.
 
-The final report is in `project_template (1).ipynb`.
+The final report is in `project_template (2).ipynb`. It only contains text, tables and figures; all numbers in it come from the outputs of the Phase 6 and Phase 7 notebooks.
 
 ## Notes
 
@@ -131,16 +131,22 @@ The final report is in `project_template (1).ipynb`.
 
 ## Main findings (short)
 
-- Car ownership is lowest in the big cities and highest in rural areas.
-- Neighbourhoods further from a station have more cars per household (0.93 at 0–1 km, 1.35 at 8–10 km). This effect stays significant with control variables, but it is small compared to household size, urbanisation and density.
-- Neighbourhoods near a major station have slightly lower car ownership, but after adding the control variables the slope is not significantly different between major and minor stations.
-- We find no evidence that the effect of distance is weaker near stations with a high share of disrupted trains: the interaction is very small and not significant. With the old measure (number of disruptions per year) the effect looked stronger, but that measure mostly shows how busy a station is.
+These are the results for the 9,039 neighbourhoods within 10 km of a station.
+
+- Car ownership is lowest in the big cities and highest in rural areas. The stations with the highest share of disrupted trains in 2023 are Eygelshoven Markt and several stations on the line through Zeeland.
+- Neighbourhoods further from a station have more cars per household (0.93 at 0–1 km, 1.35 at 8–10 km). With control variables the effect stays significant but becomes small: 0.005 extra cars per household per km (R² = 0.76). Household size, urbanisation and density matter much more. The effect stays the same in both robustness checks.
+- Neighbourhoods near a major station have slightly lower car ownership (0.03 fewer cars per household with controls), but the increase with distance is the same for major and minor stations (p = 0.97).
+- We find no evidence that the effect of distance is weaker near stations with a high share of disrupted trains (interaction p = 0.71). With the old measure (number of disruptions per year) the effect looked stronger, but that measure mostly shows how busy a station is (correlation 0.83 with the number of trains per day).
+
+**In short:** living closer to a station goes together with owning fewer cars, but most of this is explained by the dense, urban character of station areas and not by the station itself. Building homes near a station will therefore not by itself lead to much lower car ownership.
 
 ## References
 
-- CBS (2026). *Kerncijfers wijken en buurten 2023* (85618NED). StatLine. https://www.cbs.nl/nl-nl/cijfers/detail/85618NED
-- CBS (2025). *Nabijheid voorzieningen; afstand locatie, wijk- en buurtcijfers 2023* (85830NED). StatLine. https://www.cbs.nl/nl-nl/cijfers/detail/85830NED
-- CBS & Kadaster (2026). *Wijk- en buurtkaart 2023*, version 3. https://www.cbs.nl/nl-nl/dossier/nederland-regionaal/geografische-data/wijk-en-buurtkaart-2023
-- Rijden de Treinen (2026). *Open data: railway stations*. CC0. https://www.rijdendetreinen.nl/en/open-data/stations
-- Rijden de Treinen (2026). *Open data: train disruptions*. CC BY 4.0. https://www.rijdendetreinen.nl/en/open-data/disruptions
-- Rijden de Treinen (2026). *Open data: train archive*. https://www.rijdendetreinen.nl/en/open-data/train-archive
+The full list of literature is in the final report. The datasets we used are:
+
+- CBS. (2025). *Nabijheid voorzieningen; afstand locatie, wijk- en buurtcijfers 2023* (Table 85830NED) [Data set]. StatLine. https://www.cbs.nl/nl-nl/cijfers/detail/85830NED
+- CBS. (2026). *Kerncijfers wijken en buurten 2023* (Table 85618NED) [Data set]. StatLine. https://www.cbs.nl/nl-nl/cijfers/detail/85618NED
+- CBS & Kadaster. (2026). *Wijk- en buurtkaart 2023* (Version 3) [Data set]. https://www.cbs.nl/nl-nl/dossier/nederland-regionaal/geografische-data/wijk-en-buurtkaart-2023
+- Rijden de Treinen. (2026a). *Open data: Railway stations* [Data set]. https://www.rijdendetreinen.nl/en/open-data/stations
+- Rijden de Treinen. (2026b). *Open data: Train disruptions* [Data set]. https://www.rijdendetreinen.nl/en/open-data/disruptions
+- Rijden de Treinen. (2026c). *Open data: Train archive* [Data set]. https://www.rijdendetreinen.nl/en/open-data/train-archive
